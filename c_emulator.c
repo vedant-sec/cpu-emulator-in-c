@@ -3,7 +3,7 @@
 #include <stdbool.h>
 #include <string.h>
 
-#define MEM_SIZE 65536//since the data-field is 16bit , mem-size = 2^16=>4kb
+#define MEM_SIZE 65536//since the data-field is 16bit , mem-size = 2^16=>6666664kb
 #define NUM_REGS 8
 
 typedef struct {
@@ -30,6 +30,9 @@ static void cpu_init(CPU *cpu){
 	for(int i = 0 ; i < MEM_SIZE ; i++) cpu->mem[i]=0;
 	for(int i = 0 ; i < NUM_REGS;i++) cpu->reg[i] =0 ;
 	cpu->pc = 0;
+	//z - zero flag => set to 1 if the result was exactly 0 
+	//n - negative flag => set to 1 , if the result's top bit is 1
+	//c - carry flag => set to 1 if the operation produced a result too big for 16bits , meaning a bit is 'carried out' of the top .
 	cpu->z = cpu->n=cpu->c=false ;
 	cpu->halted = false ;
 
@@ -65,9 +68,9 @@ static void cpu_step(CPU *cpu){
     case OPCODE_ADD_IMM: {
         uint32_t sum = (uint32_t)cpu->reg[r] + val;
         cpu->reg[r] = (uint16_t)sum;
-        cpu->c = sum > 0xFFFF;
-        cpu->z = cpu->reg[r] == 0;
-        cpu->n = (cpu->reg[r] & 0x8000) != 0;
+        cpu->c = sum > 0xFFFF; //0xFFFF - max value a 16bit register can hold , if the sum is more , that indicates overflow , then the carry register is set to 1(TRUE).
+        cpu->z = cpu->reg[r] == 0; // zero register  ,if the value is 0 , it is set to true
+        cpu->n = (cpu->reg[r] & 0x8000) != 0;//negative flag , set to 1 if the value is negative 
         break;
     }
     case OPCODE_HALT:
